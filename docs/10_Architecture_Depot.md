@@ -1,7 +1,18 @@
 # DOCUMENT DE CADRAGE 10 : ARCHITECTURE DU DÉPÔT (MONOREPO PNPM)
-**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.1.0
+**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.2.0
+*Révision 1.2.0 (16/10/2026) : principes d'ingénierie formalisés (§0 : TDD phase 1, SOLID aux frontières, KISS prioritaire, une fonction = un traitement, une classe = une intention, un composant rend sans calculer) ; arborescence cible complète du frontend (`apps/web`, §3.2) et du backend (`apps/server`, §3.3) ; règle « une app ne dépend d'aucune autre app » ; Q8 (emplacement du serveur MCP local).*
 *Révision 1.1.0 (16/10/2026) : amendements après l'exécution du squelette - écriture minimale d'`upsertNode` (pas de conflits fantômes), contrat « une seule origine » par projet (`createEmptyReplica`, fusion d'origines indépendantes = conflit de la carte racine), types en alias (contrainte Automerge), installation explicite de pnpm 12.11.2 (bascule automatique impossible depuis pnpm < 12).*
 *Révision 1.0.0 (16/10/2026) : création. Fige les décisions structurantes issues du Spike B (D1-D7), l'arborescence du monorepo, les frontières de dépendances, les contrats de paquets et le pipeline CI. Aucun code produit : la phase 0 reste ouverte (PRD §7).*
+
+## 0. Principes d'ingénierie (règles de travail)
+*Décision (16/10/2026) : ces règles gouvernent le code de la phase 1 et au-delà. Le squelette de la phase 0 (frontières, coquilles documentées) les prépare sans y être encore soumis.*
+
+*   **TDD (phase 1) :** un test d'abord, vu échouer pour la bonne raison ; le code minimal ensuite ; le refactor en dernier, sous les plafonds ci-dessous. Les tests sont la spécification. Aucun `sleep`, aucune horloge murale, aucun réseau réel dans les tests ; suite verte à chaque commit. `@yidik/scene` (fonctions pures) et `@yidik/sync` (pairs en mémoire) sont le terrain naturel de la discipline.
+*   **SOLID aux frontières :** une responsabilité par paquet (S) ; le sens imposé des dépendances est la seule direction autorisée (D), vérifié mécaniquement par `scripts/check-boundaries.mjs` ; signatures structurelles minimales - un consommateur ne dépend que de ce qu'il utilise (I) ; pas d'interface abstraite sans besoin présent (une implémentation + un appelant ne justifient pas une abstraction). L'ouverture du modèle passe par `SCHEMA_VERSION` et les migrations, jamais par des ramifications `if type ==` dispersées (O).
+*   **KISS d'abord, YAGNI ensuite :** en cas de conflit entre principes, la simplicité l'emporte sur SOLID. Aucune abstraction sans appelant présent, aucun paramètre « au cas où » : le plus petit ensemble de paquets, fichiers et lignes qui résout le problème actuel.
+*   **Une fonction = un traitement :** une raison de changer, un niveau d'abstraction, pas de « et » dans le nom. Plafonds : ≤ 50 lignes physiques, ≤ 3 paramètres, complexité cyclomatique ≤ 10, imbrication ≤ 3, retour précoce (jamais de `else` après un retour), zéro état partagé mutable. Plafond franchi = extraction, pas de commentaire d'excuse.
+*   **Une classe = une intention :** nommable en un groupe nominal (`SceneStore`, `MergeResolver`), une seule raison de changer. Plafonds : ≤ 7 méthodes publiques, ≤ 4 dépendances, ≤ 300 lignes ; pas de paramètre booléen dans l'API publique ; composition avant héritage.
+*   **Un composant rend, il ne calcule pas :** tris, filtres, transformations et règles métier sortent du corps de rendu (fonctions pures nommées, testables sans montage). Plafonds : ≤ 250 lignes, ≤ 7 props, profondeur d'arbre ≤ 3, ≤ 2 états internes.
 
 ## 1. Statut et périmètre
 *   **Objet :** définir l'architecture du dépôt - arborescence, paquets, frontières, contrats, outillage, CI - pour que le premier code de la phase 1 s'écrive sans redécision structurelle.
@@ -20,7 +31,8 @@
 | D6 | **pnpm workspaces, sans orchestrateur** (ni Turborepo ni Nx) | besoin réel : 5 paquets + 1 app ; KISS ; réévaluer à l'entrée desktop/mobile |
 | D7 | **Chaîne d'approvisionnement : versions exactes + lockfile committé + `strictDepBuilds` avec liste `allowBuilds` revue** | pnpm 12 (vérifié, registre npm) : l'installation **échoue** sur tout script de build tiers non revu |
 
-## 3. Arborescence cible
+## 3. Arborescence : état actuel puis cible
+### 3.1 État actuel (phase 0, committé le 16/10/2026)
 ```
 yidi/
 ├── apps/
@@ -41,9 +53,53 @@ yidi/
 ├── package.json                  # scripts racine, devDependencies outillage
 └── README.md
 ```
+*   Les harnais de spike ont été retirés (commit `84daf79`) : la valeur d'un spike est sa réponse écrite, pas son code.
 
-*   **apps/desktop et apps/mobile n'existent pas encore** (phases 2-3) : les frontières ci-dessous les accueillent sans re-décision.
-*   **docs/annexes/** reste une archive datée : les résultats de spikes n'y sont jamais réécrits.
+### 3.2 Cible phase 1 - `apps/web` (frontend)
+```
+apps/web/
+├── index.html                    # hôte de la SPA (existant)
+├── vite.config.ts                # dev + build Vite (existant)
+├── tsconfig.json                 # projet TypeScript (existant)
+└── src/
+    ├── main.tsx                  # point d'entrée : monte le routeur (existant)
+    ├── router.tsx                # routes TanStack Router (existant)
+    ├── app.tsx                   # coquille racine (existant)
+    ├── styles.css                # styles globaux (existant)
+    ├── features/
+    │   ├── editor/               # canvas : rendu du graphe, sélection, édition directe (doc 02)
+    │   ├── history/              # panneau des versions - onglet « Historique » (doc 06 §2.1)
+    │   ├── merge/                # écran de fusion 3 panneaux + badges de conflit (doc 06 §3)
+    │   └── preview/              # mode Preview des formulaires réels (doc 06 §4)
+    ├── workers/
+    │   └── storage/              # worker dédié par origine : document Automerge + persistance (doc 03 §1)
+    ├── sync/                     # client LAN : messages de synchronisation, appairage (doc 03 §3)
+    └── ui/                       # primitives visuelles partagées (alimentées par @yidik/tokens)
+```
+*   **Naissance des fichiers (§0, TDD) :** chaque fichier arrive en phase 1 avec son test et une seule intention ; les fichiers internes des `features/` ne sont pas pré-enregistrés à l'avance - leur découpage suit les tests. Un fichier sans appelant ni test est un déchet.
+
+### 3.3 Cible phase 2-3 - `apps/server` (backend « Yidik Cloud », doc 03 §4)
+```
+apps/server/
+├── package.json                  # @yidik/server - privé ; aucune dépendance runtime avant le premier usage réel (revue D7)
+├── tsconfig.json
+└── src/
+    ├── index.ts                  # amorçage Fastify : réseau, routes, arrêt propre
+    ├── config.ts                 # configuration par variables d'environnement (aucun secret en dur)
+    ├── routes/
+    │   ├── health.ts             # GET /health (supervision)
+    │   └── sync.ts               # ingress des messages de synchronisation Automerge (WebSocket / POST)
+    ├── commits/                  # phase 2 : ingestion et lecture de l'historique des commits (doc 06 §2)
+    ├── db/                       # phase 2 : PostgreSQL - documents binaires + commits, partition par hash de projet (doc 03 §4)
+    └── redis/                    # phase 2 : Redis Streams - distribution temps réel + file d'ingestion durable (doc 03 §4)
+```
+*   Le découpage des dossiers `commits/`, `db/` et `redis/` naît en phase 2 par TDD (§0) ; Fastify, PostgreSQL et Redis ne sont ajoutés qu'au premier usage réel, avec revue D7.
+
+### 3.4 Plateformes ultérieures
+*   **`apps/desktop`** (phase 2) : Tauri v2, interface React/TanStack partagée avec le web ; persistance SQLite (doc 03 §2).
+*   **`apps/mobile`** (phase 3) : Expo + Nitro SQLite ; même document Automerge que les autres plateformes (doc 03 §3).
+*   **Serveur MCP local** (doc 05 §1) : processus local (127.0.0.1:8321) ; emplacement dans le dépôt à trancher - **Q8** (§10).
+*   Les frontières de §4 accueillent ces plateformes sans re-décision ; `docs/annexes/` reste une archive datée : les résultats de spikes n'y sont jamais réécrits.
 
 ## 4. Frontières et règles de dépendances
 *   **Sens des dépendances :** les types (`ast`) ne dépendent de rien ; les règles d'arbre (`scene`) dépendent de `ast` ; l'adaptateur moteur (`sync`) dépend de `scene` ; les apps dépendent des paquets, jamais l'inverse. Une frontière tracée avant le code coûte moins cher qu'une extraction après.
@@ -57,8 +113,10 @@ yidi/
 | `@yidik/tokens` | `@yidik/ast` | DOM, Node |
 | `@yidik/sync` | `@yidik/ast`, `@yidik/scene` + `@automerge/automerge` (seule dépendance externe autorisée) | DOM, Node, apps |
 | `apps/web` | tous les `@yidik/*` + dépendances UI | - (une app dépend, elle n'est pas dépendue) |
+| `apps/server` | tous les `@yidik/*` + dépendances serveur (Fastify, PostgreSQL, Redis - revue D7) | les autres apps |
 
-*   **Application mécanique :** `scripts/check-boundaries.mjs` lit les `package.json` du workspace et échoue si (1) une dépendance runtime d'un paquet sort de l'allowlist, (2) un paquet dépend d'une app, (3) une dépendance externe apparaît sans décision. Exécuté en local (`pnpm check:boundaries`) et en CI.
+*   **Application mécanique :** `scripts/check-boundaries.mjs` lit les `package.json` du workspace et échoue si (1) une dépendance runtime d'un paquet sort de l'allowlist (une dépendance externe n'y figure que par décision), (2) un paquet dépend d'une app, (3) une app dépend d'une autre app. Exécuté en local (`pnpm check:boundaries`) et en CI.
+*   **Plateformes ultérieures :** `apps/desktop` et `apps/mobile` (phases 2-3) suivront le profil d'`apps/web` - dépendre des paquets, n'être ni dépendues, ni interdépendantes.
 *   **Paquets internes = sources TypeScript :** `"exports": { ".": "./src/index.ts" }` - pas d'étape de build bibliothèque en phase 1 (Vite et `tsc` consomment directement le TS). Imports relatifs sans extension ; dépendances internes en `workspace:*`. Ce choix est révisable si une publication (doc 05, codegen) l'exige.
 *   **Neutralité plateforme :** les paquets n'utilisent ni DOM ni API Node (testables sous Node, embarquables dans un worker web ou Tauri) ; les spécificités plateforme restent dans les apps.
 
@@ -147,6 +205,7 @@ Commandes locales équivalentes :
 | Q5 | Transport LAN : WebSocket, découverte (mDNS vs QR), appairage TOFU | phase 1 (spécification sécurité) |
 | Q6 | Taille des documents Automerge (tombstones, historique complet) : budget à mesurer | Spikes A/C |
 | Q7 | Format du stockage des commits (instantané binaire `save()` par commit) et partitionnement backend | phase 2-3 |
+| Q8 | Emplacement du serveur MCP local (doc 05 §1) : processus séparé (`apps/mcp`, Node) ou intégré au shell desktop ? | phase 2 |
 
 ## 11. Dette assumée et hors périmètre
 *   `apps/desktop`, `apps/mobile` : absents (phases 2-3) - les frontières les accueillent.
