@@ -2,7 +2,7 @@
 
 Éditeur de design d'interface **local-first** : canvas vectoriel hors-ligne, composants de formulaire réels en Preview, versioning graphique avec fusion visuelle, assistance IA locale via MCP.
 
-> **Statut : cadrage v1.1 (octobre 2026) - aucun code. Phase 0 (dérisquage) en cours.**
+> **Statut : cadrage v1.2 (octobre 2026) - phase 0 (dérisquage) en cours ; squelette de dépôt en place (monorepo pnpm, aucun code produit).**
 
 ## Documents de cadrage
 
@@ -17,6 +17,7 @@
 | 07 | [Guide d'entretiens](docs/07_Guide_Entretiens_Phase0.md) | Recrutement, déroulé, synthèse - valide les hypothèses A1/A2 |
 | 08 | [Protocole des spikes](docs/08_Protocole_Spikes_Phase0.md) | Spikes A (stockage), B (fusion CRDT), C (renderer 60 fps) |
 | 09 | [Modèle de synthèse entretiens](docs/09_Synthese_Entretiens_Modele.md) | Structure de dépouillement : campagne, participants, registre des constats, verdicts A1/A2, décision |
+| 10 | [Architecture du dépôt](docs/10_Architecture_Depot.md) | Monorepo pnpm : décisions D1-D7, frontières de paquets, contrats, outillage vérifié, CI |
 
 ## Harnais Phase 0
 
