@@ -1,0 +1,32 @@
+# Dépendances et builds JS
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Secrets et variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Rust / Tauri
+target/
+src-tauri/target/
+
+# Expo / React Native
+.expo/
+*.jks
+*.keystore
+*.mobileprovision
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
