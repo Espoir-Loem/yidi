@@ -1,0 +1,77 @@
+Spike B ÔÇö volet Automerge
+Date : 2026-10-16T06:30:08.327Z
+Node : v26.7.0 ┬À OS : win32/x64 ┬À C┼ôurs : 6
+@automerge/automerge : 3.5.0
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+SC├ëNARIO a ÔÇö m├¬me attribut modifi├® sur deux clients (conflit attendu : MVR visible)
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+ÔöÇÔöÇ Hors-ligne des deux c├┤t├®s ÔöÇÔöÇ
+   client A : n01.fill ÔåÉ ┬½ bleu ┬╗   ┬À   client B : n01.fill ÔåÉ ┬½ vert ┬╗
+
+ÔöÇÔöÇ Apr├¿s synchronisation (merge) ÔöÇÔöÇ
+   ├®tat fusionn├® : {"id":"n01","fill":"bleu","size":8,"name":"Noeud n01","order":"a00"}
+   getConflicts(n01, fill) ÔåÆ {"4002@414bbd53bf14c16ad5a63b2b45341b57":"vert","4002@f7a5bc608d304f9d8eae58a3c064cb63":"bleu"}
+
+ÔöÇÔöÇ R├®solution programmatique (lÔÇÖUI choisit ┬½ bleu ┬╗) ÔöÇÔöÇ
+   getConflicts apr├¿s r├®solution ÔåÆ aucun
+   propagation aux deux clients ÔÇö A : {"id":"n01","fill":"bleu","size":8,"name":"Noeud n01","order":"a00"} ┬À B : {"id":"n01","fill":"bleu","size":8,"name":"Noeud n01","order":"a00"} ┬À convergents : oui
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+SC├ëNARIO b ÔÇö suppression dÔÇÖun c├┤t├®, modification de lÔÇÖautre
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+ÔöÇÔöÇ Hors-ligne des deux c├┤t├®s ÔöÇÔöÇ
+   client A : n05 supprim├®   ┬À   client B : n05.fill ÔåÉ ┬½ orange ┬╗
+
+ÔöÇÔöÇ Apr├¿s synchronisation (merge) ÔöÇÔöÇ
+   n05 pr├®sent dans la carte : non (la suppression lÔÇÖemporte)
+   ├®tat n05 : absent
+   getConflicts(nodes, n05) ÔåÆ aucun
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+SC├ëNARIO c ÔÇö insertion concurrente au m├¬me rang dÔÇÖordre (index fractionnaire)
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+ÔöÇÔöÇ Hors-ligne des deux c├┤t├®s (m├¬me rang ┬½ a05.5 ┬╗) ÔöÇÔöÇ
+   client A : insertion n21 (order a05.5)   ┬À   client B : insertion n22 (order a05.5)
+
+ÔöÇÔöÇ Apr├¿s synchronisation (merge) ÔöÇÔöÇ
+   ├®tat client fusionn├® : ["{\"id\":\"n21\",\"fill\":\"#2F6FEB\",\"size\":12,\"name\":\"N┼ôud ins├®r├® par A\",\"order\":\"a05.5\"}","{\"id\":\"n22\",\"fill\":\"#1F883D\",\"size\":12,\"name\":\"N┼ôud ins├®r├® par B\",\"order\":\"a05.5\"}"]
+   getConflicts(n21, order) ÔåÆ aucun ┬À getConflicts(n22, order) ÔåÆ aucun
+   les deux insertions sont conserv├®es, mais deux n┼ôuds partagent order = "a05.5" : m├¬me constat que c├┤t├® RxDB ÔÇö le rang nÔÇÖest pas un registre, lÔÇÖUI doit d├®partager.
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+SC├ëNARIO d ÔÇö modifications disjointes (fusion SANS conflit attendue)
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+
+ÔöÇÔöÇ Hors-ligne des deux c├┤t├®s ÔöÇÔöÇ
+   client A : n02.name modifi├®   ┬À   client B : n02.size modifi├®
+
+ÔöÇÔöÇ Apr├¿s synchronisation (merge) ÔöÇÔöÇ
+   ├®tat fusionn├® : {"id":"n02","fill":"#1F883D","size":42,"name":"En-t├¬te (client A)","order":"a01"}
+   getConflicts(n02, name) ÔåÆ aucun ┬À getConflicts(n02, size) ÔåÆ aucun
+   les deux modifications sont appliqu├®es, aucun conflit signal├® (comportement attendu).
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+TEST DE PROPRI├ëT├ë ÔÇö 100 permutations de lÔÇÖordre dÔÇÖarriv├®e
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+   Les op├®rations locales de chaque client sont fixes (histoire lin├®aire) ; la permutation porte sur lÔÇÖordre et la multiplicit├® des fusions (commutativit├®, associativit├®, idempotence).
+   ÔÇª 25/100 permutations (25 convergentes jusquÔÇÖici)
+   ÔÇª 50/100 permutations (50 convergentes jusquÔÇÖici)
+   ÔÇª 75/100 permutations (75 convergentes jusquÔÇÖici)
+   ÔÇª 100/100 permutations (100 convergentes jusquÔÇÖici)
+
+ÔöÇÔöÇ R├®sultat ÔöÇÔöÇ
+   permutations convergentes : 100/100 (en 1.5 s)
+
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+R├ëSUM├ë AUTOMERGE
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+   sc├®nario a ÔÇö convergence : oui
+   sc├®nario b ÔÇö convergence : oui
+   sc├®nario c ÔÇö convergence : oui
+   sc├®nario d ÔÇö convergence : oui
+   propri├®t├® (ordre dÔÇÖarriv├®e) : 100/100
+
