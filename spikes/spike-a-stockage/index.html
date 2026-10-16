@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yidik - Spike A : stockage navigateur (OPFS vs IndexedDB)</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 24px; max-width: 1080px; margin-inline: auto; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 24px 0 8px; }
+  .sub { opacity: .75; font-size: .9rem; margin-bottom: 16px; }
+  .card { border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  label { display: block; font-size: .85rem; opacity: .8; margin-bottom: 4px; }
+  input[type=text] { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: transparent; color: inherit; }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 6%, transparent); color: inherit; cursor: pointer; font: inherit; margin: 2px 4px 2px 0; }
+  button:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { border-color: #2F6FEB; background: #2F6FEB22; }
+  table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); vertical-align: top; }
+  th { font-weight: 600; opacity: .8; }
+  code, pre { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .85rem; }
+  pre#log { background: color-mix(in srgb, currentColor 5%, transparent); border-radius: 8px; padding: 10px; max-height: 220px; overflow: auto; white-space: pre-wrap; }
+  textarea { width: 100%; min-height: 160px; font-family: ui-monospace, Consolas, monospace; font-size: .8rem; background: transparent; color: inherit; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 25%, transparent); padding: 8px; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .78rem; margin-right: 6px; border: 1px solid; }
+  .ok { border-color: #1F883D; color: #1F883D; }
+  .ko { border-color: #CF222E; color: #CF222E; }
+  .muted { opacity: .6; }
+</style>
+</head>
+<body>
+<h1>Spike A - Stockage navigateur : OPFS vs IndexedDB</h1>
+<p class="sub">Harnais du protocole <code>docs/08_Protocole_Spikes_Phase0.md</code> §Spike A. Mesure les primitives dans un worker dédié, même jeu de données pour les deux backends (10 000 documents de 1 Ko, graine fixe). Exporter le JSON après campagne : une entrée par plateforme dans <code>RESULTATS.md</code>.</p>
+
+<div class="card">
+  <h2 style="margin-top:0">1. Environnement</h2>
+  <div class="grid">
+    <div>
+      <label for="label">Étiquette machine (à remplir : OS / CPU / RAM)</label>
+      <input type="text" id="label" placeholder="ex. Windows-11 / i7-1165G7 / 16 Go">
+    </div>
+    <div>
+      <label>Navigateur</label>
+      <div id="env-ua" class="muted">…</div>
+    </div>
+    <div>
+      <label>Capacités détectées</label>
+      <div id="env-features">…</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">2. Campagne</h2>
+  <div>
+    <button id="btn-prepare-opfs">Préparer OPFS (10 000 docs)</button>
+    <button id="btn-prepare-idb">Préparer IndexedDB (10 000 docs)</button>
+    <button id="btn-run-opfs" class="primary">Lancer OPFS</button>
+    <button id="btn-run-idb" class="primary">Lancer IndexedDB</button>
+    <button id="btn-run-all" class="primary">Tout lancer (prépare + mesure)</button>
+  </div>
+  <div style="margin-top:6px">
+    <button id="btn-reset-opfs" class="muted">Réinitialiser OPFS</button>
+    <button id="btn-reset-idb" class="muted">Réinitialiser IndexedDB</button>
+  </div>
+  <p class="sub" style="margin:8px 0 0">Multi-onglets : ouvrir cette page dans deux onglets et lancer « Tout lancer » dans les deux - OPFS prend un verrou Web Locks (le second onglet attend), IndexedDB non.</p>
+  <pre id="log">Prêt.</pre>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">3. Résultats - OPFS</h2>
+  <div id="results-opfs" class="muted">Non mesuré.</div>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">4. Résultats - IndexedDB</h2>
+  <div id="results-idb" class="muted">Non mesuré.</div>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">5. Export</h2>
+  <div>
+    <button id="btn-copy">Copier le JSON</button>
+    <button id="btn-download">Télécharger .json</button>
+    <span id="copy-state" class="muted"></span>
+  </div>
+  <textarea id="export" spellcheck="false" placeholder="Le JSON apparaît ici après une mesure."></textarea>
+</div>
+
+<script>
+'use strict';
+const worker = new Worker('./bench.worker.js');
+
+const $ = (id) => document.getElementById(id);
+const logBox = $('log');
+const features = {};
+const results = { opfs: null, idb: null };
+const estimates = { opfs: null, idb: null };
+
+function log(text) {
+  logBox.textContent += '\n' + text;
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+let nextId = 1;
+const pending = new Map();
+worker.onmessage = (ev) => {
+  const msg = ev.data;
+  if (msg.type === 'log') { log(msg.text); return; }
+  const entry = pending.get(msg.id);
+  if (!entry) return;
+  pending.delete(msg.id);
+  if (msg.ok) entry.resolve(msg.payload); else entry.reject(new Error(msg.error));
+};
+function call(cmd, args) {
+  const id = nextId++;
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    worker.postMessage({ id, cmd, args });
+  });
+}
+
+/* ---------- rendu ---------- */
+
+const fmtMs = (x) => (x == null ? '-' : x.toFixed(2) + ' ms');
+const fmtMo = (bytes) => (bytes == null ? '-' : (bytes / 1048576).toFixed(2) + ' Mo');
+const fmtMbps = (x) => (x == null ? '-' : x.toFixed(1) + ' Mo/s');
+const fmtStat = (op) => `${fmtMs(op.p50)} (p50) / ${fmtMs(op.p95)} (p95) - min ${fmtMs(op.min)}, max ${fmtMs(op.max)}`;
+
+function renderStats(container, result) {
+  const ops = result.ops;
+  const q = ops.queries20;
+  const qCounts = q.resultCounts ? `${Math.min(...q.resultCounts)}-${Math.max(...q.resultCounts)} résultats/requête` : '';
+  container.innerHTML = `
+    <table>
+      <tr><th>Opération</th><th>Mesure</th><th>Méthode</th></tr>
+      <tr><td>Démarrage à froid</td><td>${fmtMs(ops.coldStart.ms)}${ops.coldStart.sizeBytes ? ' - fichier ' + fmtMo(ops.coldStart.sizeBytes) : ''}</td><td>ouverture complète + première lecture</td></tr>
+      <tr><td>Insertion 500 docs</td><td>${fmtMs(ops.insertBatch500.ms)} - ${fmtMbps(ops.insertBatch500.bytes / 1048576 / (ops.insertBatch500.ms / 1000))}</td><td>une écriture contiguë de 512 Ko / une transaction</td></tr>
+      <tr><td>Lectures par id (1 000)</td><td>${fmtStat(ops.pointReads1000)}</td><td>latence par lecture, ids communs aux backends</td></tr>
+      <tr><td>Mises à jour ciblées (500)</td><td>${fmtStat(ops.updates500)}</td><td>lecture-modification-écriture, ids communs</td></tr>
+      <tr><td>Requêtes simples (20)</td><td>${fmtStat(ops.queries20)}<br><span class="muted">${qCounts}</span></td><td>balayage complet + filtre, sans index (pire cas assumé)</td></tr>
+      <tr><td>Balayage séquentiel</td><td>${fmtMs(ops.scan.ms)} - ${ops.scan.bytes ? fmtMbps(ops.scan.mbPerSec) : ops.scan.records + ' docs lus'}</td><td>lecture intégrale brute</td></tr>
+      <tr><td>Taille</td><td>${fmtMo(ops.size.fileSize)}${estimates[result.backend] ? ' - estimate ' + estimates[result.backend] : ''}</td><td>fichier OPFS / estimation par origine (IDB)</td></tr>
+    </table>`;
+}
+
+function refreshExport() {
+  const payload = {
+    protocole: 'docs/08_Protocole_Spikes_Phase0.md - Spike A',
+    etiquetteMachine: $('label').value || null,
+    date: new Date().toISOString(),
+    env: {
+      userAgent: navigator.userAgent,
+      plateforme: navigator.platform || null,
+      coeursLogiques: navigator.hardwareConcurrency || null,
+      memoireGo: navigator.deviceMemory || null,
+      origine: location.origin,
+    },
+    capacites: features,
+    tailles: estimates,
+    resultats: { opfs: results.opfs, idb: results.idb },
+    notes: '',
+  };
+  $('export').value = JSON.stringify(payload, null, 2);
+}
+
+/* ---------- actions ---------- */
+
+async function guard(btn, fn) {
+  const buttons = document.querySelectorAll('button');
+  buttons.forEach((b) => (b.disabled = true));
+  try { await fn(); }
+  catch (e) { log('ERREUR : ' + e.message); }
+  finally { buttons.forEach((b) => (b.disabled = false)); }
+}
+
+async function prepare(backend) {
+  const payload = await call('prepare', { backend });
+  estimates[backend] = payload.estimateAfter ? fmtMo(payload.estimateAfter.usage) : null;
+  const delta = payload.estimateBefore && payload.estimateAfter
+    ? ' (Δ ' + fmtMo(payload.estimateAfter.usage - payload.estimateBefore.usage) + ')'
+    : '';
+  log(`[${backend}] préparé : ${payload.docs} docs, ${payload.sizeBytes ? fmtMo(payload.sizeBytes) : 'taille fichier n/a'}${delta}`);
+}
+
+async function measure(backend) {
+  const result = await call('run', { backend });
+  results[backend] = result;
+  renderStats($('results-' + backend), result);
+  log(`[${backend}] mesures terminées.`);
+  refreshExport();
+}
+
+/* ---------- câblage ---------- */
+
+$('btn-prepare-opfs').onclick = () => guard(null, () => prepare('opfs'));
+$('btn-prepare-idb').onclick = () => guard(null, () => prepare('idb'));
+$('btn-run-opfs').onclick = () => guard(null, () => measure('opfs'));
+$('btn-run-idb').onclick = () => guard(null, () => measure('idb'));
+$('btn-run-all').onclick = () => guard(null, async () => {
+  if (!results.opfs) { await prepare('opfs'); }
+  await measure('opfs');
+  if (!results.idb) { await prepare('idb'); }
+  await measure('idb');
+});
+$('btn-reset-opfs').onclick = () => guard(null, async () => {
+  await call('reset', { backend: 'opfs' });
+  results.opfs = null; $('results-opfs').textContent = 'Non mesuré (réinitialisé).';
+  estimates.opfs = null; log('[opfs] réinitialisé.');
+  refreshExport();
+});
+$('btn-reset-idb').onclick = () => guard(null, async () => {
+  await call('reset', { backend: 'idb' });
+  results.idb = null; $('results-idb').textContent = 'Non mesuré (réinitialisé).';
+  estimates.idb = null; log('[idb] réinitialisé.');
+  refreshExport();
+});
+
+$('btn-copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($('export').value);
+    $('copy-state').textContent = 'Copié.';
+  } catch {
+    $('export').select();
+    document.execCommand('copy');
+    $('copy-state').textContent = 'Copié (repli).';
+  }
+  setTimeout(() => ($('copy-state').textContent = ''), 2000);
+};
+$('btn-download').onclick = () => {
+  const blob = new Blob([$('export').value], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'spike-a-' + Date.now() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+$('label').oninput = refreshExport;
+
+/* ---------- initialisation ---------- */
+
+(async () => {
+  $('env-ua').textContent = navigator.userAgent;
+  try {
+    const f = await call('features');
+    Object.assign(features, f);
+    const badge = (ok, label) => `<span class="badge ${ok ? 'ok' : 'ko'}">${label} ${ok ? 'oui' : 'non'}</span>`;
+    $('env-features').innerHTML =
+      badge(f.opfs, 'OPFS (handles sync)') +
+      badge(f.indexedDB, 'IndexedDB') +
+      badge(f.webLocks, 'Web Locks') +
+      badge(f.storageEstimate, 'estimate');
+    if (!f.opfs) log('OPFS indisponible sur ce navigateur - le harnais ne mesurera qu\u2019IndexedDB (fait zéro pour cette plateforme).');
+    refreshExport();
+  } catch (e) {
+    $('env-features').textContent = 'Erreur de détection : ' + e.message;
+  }
+})();
+</script>
+</body>
+</html>
