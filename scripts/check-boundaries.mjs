@@ -6,7 +6,8 @@
  * Regles :
  *   1. chaque paquet de packages/* doit figurer dans l'allowlist ;
  *   2. ses dependances *runtime* (champ dependencies) doivent y figurer aussi ;
- *   3. un paquet ne peut jamais dependre d'une app (apps/*).
+ *   3. un paquet ne peut jamais dependre d'une app (apps/*) ;
+ *   4. une app ne peut jamais dependre d'une autre app (apps/*).
  * Les devDependencies (outillage) ne sont pas contraintes ici.
  */
 import { readdir, readFile } from "node:fs/promises";
@@ -59,6 +60,17 @@ for (const dir of packageDirs) {
     if (!allowed.includes(dep)) {
       violations.push(
         `${pkg.name} : dependance runtime interdite -> ${dep} (autorise : ${allowed.join(", ") || "aucune"})`,
+      );
+    }
+  }
+}
+
+for (const dir of appDirs) {
+  const app = await readPackageJson(dir);
+  for (const dep of Object.keys(app.dependencies ?? {})) {
+    if (appNames.has(dep)) {
+      violations.push(
+        `${app.name} : dependance d'une app vers une app (${dep}) interdite (doc 10 §4)`,
       );
     }
   }
