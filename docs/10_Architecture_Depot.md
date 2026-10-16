@@ -1,5 +1,6 @@
 # DOCUMENT DE CADRAGE 10 : ARCHITECTURE DU DÉPÔT (MONOREPO PNPM)
-**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.2.0
+**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.3.0
+*Révision 1.3.0 (16/10/2026) : coquille `apps/server` posée dans le dépôt (structure seule, aucune dépendance externe, vérifiée par le typecheck CI) ; §3.1, §3.3 et §5 mis à jour.*
 *Révision 1.2.0 (16/10/2026) : principes d'ingénierie formalisés (§0 : TDD phase 1, SOLID aux frontières, KISS prioritaire, une fonction = un traitement, une classe = une intention, un composant rend sans calculer) ; arborescence cible complète du frontend (`apps/web`, §3.2) et du backend (`apps/server`, §3.3) ; règle « une app ne dépend d'aucune autre app » ; Q8 (emplacement du serveur MCP local).*
 *Révision 1.1.0 (16/10/2026) : amendements après l'exécution du squelette - écriture minimale d'`upsertNode` (pas de conflits fantômes), contrat « une seule origine » par projet (`createEmptyReplica`, fusion d'origines indépendantes = conflit de la carte racine), types en alias (contrainte Automerge), installation explicite de pnpm 12.11.2 (bascule automatique impossible depuis pnpm < 12).*
 *Révision 1.0.0 (16/10/2026) : création. Fige les décisions structurantes issues du Spike B (D1-D7), l'arborescence du monorepo, les frontières de dépendances, les contrats de paquets et le pipeline CI. Aucun code produit : la phase 0 reste ouverte (PRD §7).*
@@ -36,7 +37,8 @@
 ```
 yidi/
 ├── apps/
-│   └── web/                      # @yidik/web - SPA Vite + React + TanStack Router (coquille)
+│   ├── web/                      # @yidik/web - SPA Vite + React + TanStack Router (coquille)
+│   └── server/                   # @yidik/server - coquille backend (structure seule, zéro dépendance externe)
 ├── packages/
 │   ├── ast/                      # @yidik/ast - types du Visual AST (zéro dépendance)
 │   ├── scene/                    # @yidik/scene - règles d'arbre : ordre (order, id), tombstones
@@ -81,7 +83,7 @@ apps/web/
 ### 3.3 Cible phase 2-3 - `apps/server` (backend « Yidik Cloud », doc 03 §4)
 ```
 apps/server/
-├── package.json                  # @yidik/server - privé ; aucune dépendance runtime avant le premier usage réel (revue D7)
+├── package.json                  # @yidik/server - privé ; aucune dépendance externe avant le premier usage réel (revue D7)
 ├── tsconfig.json
 └── src/
     ├── index.ts                  # amorçage Fastify : réseau, routes, arrêt propre
@@ -93,6 +95,7 @@ apps/server/
     ├── db/                       # phase 2 : PostgreSQL - documents binaires + commits, partition par hash de projet (doc 03 §4)
     └── redis/                    # phase 2 : Redis Streams - distribution temps réel + file d'ingestion durable (doc 03 §4)
 ```
+*   **Coquille posée le 16/10/2026 :** consomme `@yidik/ast` et `@yidik/scene` sous une cible Node sans DOM (preuve de la neutralité plateforme, §4) ; aucun serveur HTTP, aucune route.
 *   Le découpage des dossiers `commits/`, `db/` et `redis/` naît en phase 2 par TDD (§0) ; Fastify, PostgreSQL et Redis ne sont ajoutés qu'au premier usage réel, avec revue D7.
 
 ### 3.4 Plateformes ultérieures
@@ -148,6 +151,10 @@ apps/server/
 ### `@yidik/web` - coquille applicative
 *   Vite + React + TanStack Router ; route racine minimale ; importe `@yidik/ast` (types) et `@yidik/scene` (fonction pure) pour **prouver la liaison workspace** (résolution des exports TS par le bundler et `tsc`).
 *   Ne câble **rien** de la phase 1 : ni worker de stockage (Spike A), ni document Automerge (WASM), ni transport.
+
+### `@yidik/server` - coquille backend
+*   Cible Node (sans DOM) : importe `@yidik/ast` (types) et `@yidik/scene` (fonction pure) - même liaison workspace que le web, prouvée côté serveur.
+*   Aucun serveur HTTP, aucune route, aucune dépendance externe tant que la phase 2 n'est pas ouverte (Fastify, PostgreSQL, Redis : premier usage réel + revue D7).
 
 ## 6. Données et synchronisation (cible phase 1)
 *   **Document :** racine `{ schemaVersion, nodes }` ; un nœud par entrée `nodes[id]` ; enfants déduits par `parentId` + tri `(order, id)` - pas de tableaux d'enfants à maintenir (le reparentage concurrent est hors MVP, doc 04 §3).
