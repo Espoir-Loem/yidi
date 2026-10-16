@@ -1,7 +1,7 @@
 # 🎨 DOCUMENT 06 : Charte UX/UI – Système de Versioning Graphique & Interface de Résolution de Conflits (Visual Merge UI)
 
 **Projet :** Yidik
-**Statut :** Spécification révisée (v1.1) — validation utilisateur à planifier (aucune validation formelle n'a été menée pour la v1.0)
+**Statut :** Spécification révisée (v1.1) - validation utilisateur à planifier (aucune validation formelle n'a été menée pour la v1.0)
 **Version :** 1.1.0 (Octobre 2026)
 **Rôle Rédacteur :** Product Designer / UX-UI Lead
 **Cible :** Équipe Frontend (TanStack / Tauri) & Ingénieurs QA
@@ -25,10 +25,10 @@ Situé au centre de la barre supérieure, un badge d'état persistant indique la
 *   **🔵 État : Synchronisation en cours**
     *   *Visuel :* Spinner bleu rotatif fluide.
     *   *Texte :* « Envoi des modifications en cours… »
-    *   *(v1.0 : « Poussée des deltas JSON vers le serveur central... » — jargon d'implémentation visible utilisateur, remplacé.)*
+    *   *(v1.0 : « Poussée des deltas JSON vers le serveur central... » - jargon d'implémentation visible utilisateur, remplacé.)*
 
 ### 1.2 Accessibilité de l'Indicateur
-*   Changement d'état annoncé via une zone `aria-live="polite"` (jamais par la couleur seule — déjà porté par icône + texte).
+*   Changement d'état annoncé via une zone `aria-live="polite"` (jamais par la couleur seule - déjà porté par icône + texte).
 *   Contraste AA requis sur les trois états (jetons de la charte visuelle).
 *   Le libellé au survol est également accessible au focus clavier.
 
@@ -73,7 +73,7 @@ Trois espaces de travail verticaux synchronisés en zoom/panoramique (zoomer sur
 *   **États couverts :** aucun conflit (état vide explicite, pas d'illustration d'erreur), conflits partiellement résolus, **nouveau conflit détecté pendant la fusion** (mise en file et recalcul sans perdre les choix déjà faits), tout résolu → `[ Appliquer la Fusion ]` actif.
 *   **Clavier :** navigation inter-panneaux (Tab), sélection d'élément (flèches), choix (Entrée) ; l'ordre de focus suit les conflits restants.
 *   **Annonces :** chaque nouveau conflit et chaque résolution sont annoncés via `aria-live`.
-*   **Après application :** toast « Fusion appliquée — annulable depuis l'historique ». Le commit de fusion est réversible (doc 04 §4).
+*   **Après application :** toast « Fusion appliquée - annulable depuis l'historique ». Le commit de fusion est réversible (doc 04 §4).
 *   **Aucun écrasement silencieux :** les valeurs concurrentes non résolues restent visibles.
 
 ---
@@ -84,8 +84,8 @@ Le principal atout de Yidik : de vrais formulaires fonctionnels dans le prototyp
 
 ### 4.1 L'Interrupteur de Mode (Design vs. Live Preview)
 Situé dans le coin supérieur droit, un commutateur (Toggle) à deux positions structure l'expérience :
-*   **🛠️ Mode Conception (Design) :** les inputs, boutons et listes se comportent comme des objets vectoriels standards — redimensionnement, padding via l'Auto Layout, placeholders, schémas de validation (TanStack Form). Un clic à l'intérieur ne donne pas le focus au texte, mais sélectionne le calque.
-*   **⚡ Mode Preview Dynamique (Live Play) :** le canvas se fige structurellement mais devient totalement interactif — saisie, cases, menus déroulants, boutons déclenchant des actions logiques locales simulées. L'IA locale connectée via MCP peut analyser ce comportement de test pour ajuster le code généré (avec consentement explicite, cf. doc 05 §1).
+*   **🛠️ Mode Conception (Design) :** les inputs, boutons et listes se comportent comme des objets vectoriels standards - redimensionnement, padding via l'Auto Layout, placeholders, schémas de validation (TanStack Form). Un clic à l'intérieur ne donne pas le focus au texte, mais sélectionne le calque.
+*   **⚡ Mode Preview Dynamique (Live Play) :** le canvas se fige structurellement mais devient totalement interactif - saisie, cases, menus déroulants, boutons déclenchant des actions logiques locales simulées. L'IA locale connectée via MCP peut analyser ce comportement de test pour ajuster le code généré (avec consentement explicite, cf. doc 05 §1).
 
 ### 4.2 Isolation des Données de Test (ajout v1.1)
 *   Les saisies et actions du mode Preview s'exécutent dans un **bac à sable jetable** : jamais écrites dans les données du projet.

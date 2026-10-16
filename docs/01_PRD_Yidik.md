@@ -2,15 +2,15 @@
 **Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.1.0
 *Révision 1.1.0 (16/10/2026) : ajout du problème-cadre, de l'analyse concurrentielle vérifiée, des métriques et critères d'arrêt, du phasage ; les hypothèses non validées sont désormais explicitement étiquetées.*
 
-## 1. Problème (hypothèses — aucune preuve collectée à ce jour)
+## 1. Problème (hypothèses - aucune preuve collectée à ce jour)
 **Qui :** concepteurs produit et product engineers de petites équipes (< 20 personnes) concevant des interfaces applicatives riches en formulaires.
 **Situation :** ils maîtrisent dans un outil cloud, souvent en mobilité ou sur des réseaux instables, puis livrent des maquettes que les développeurs ré-implémentent à la main.
 **Douleur (hypothèses à vérifier) :**
 * dépendance réseau : perte de travail ou friction dès que la connexion tombe ;
 * contraintes de confidentialité : données clients sensibles exigeant un fonctionnement hors-ligne ou auto-hébergé ;
 * perte de fidélité design → code sur les formulaires (validation, états, placeholders) : ré-implémentation manuelle.
-**Preuves :** **aucune** à ce jour (0 entretien, 0 donnée quantifiée). À collecter : 5–8 entretiens portant sur un épisode passé daté — jamais sur une intention.
-**Alternative actuelle (la concurrence réelle) :** Figma, Penpot auto-hébergé, pen.dev, Sketch — voir §4.
+**Preuves :** **aucune** à ce jour (0 entretien, 0 donnée quantifiée). À collecter : 5–8 entretiens portant sur un épisode passé daté - jamais sur une intention.
+**Alternative actuelle (la concurrence réelle) :** Figma, Penpot auto-hébergé, pen.dev, Sketch - voir §4.
 **Taille :** inconnue, à estimer après les entretiens.
 **Non prescriptif :** le problème ci-dessus ne présuppose ni canvas local, ni CRDT, ni MCP.
 
@@ -19,7 +19,7 @@ Yidik est un éditeur de design d'interface local-first et distribué, dont la p
 1. indépendance réseau complète (offline-first réel, pas un mode dégradé) ;
 2. éléments d'interface réels et fonctionnels (inputs, selects, buttons avec validation et états) plutôt que des tracés inertes ;
 3. assistance IA locale via MCP.
-*Correction de cadrage (16/10/2026) : l'IA locale via MCP n'est plus un différenciateur en soi — pen.dev, Penpot et Figma l'exposent déjà. Les différenciateurs à défendre : fidélité fonctionnelle des formulaires en Preview, fusion visuelle intégrée, synchronisation multi-appareils hors-ligne.*
+*Correction de cadrage (16/10/2026) : l'IA locale via MCP n'est plus un différenciateur en soi - pen.dev, Penpot et Figma l'exposent déjà. Les différenciateurs à défendre : fidélité fonctionnelle des formulaires en Preview, fusion visuelle intégrée, synchronisation multi-appareils hors-ligne.*
 
 ## 3. Utilisateurs et personas (hypothèses non validées)
 *   **Product Designer :** conçoit des interfaces haute fidélité sans craindre les coupures réseau, génère des prototypes instantanés et interactifs.
@@ -36,12 +36,12 @@ Yidik est un éditeur de design d'interface local-first et distribué, dont la p
 
 **Fait sourcé :** le champ « maquette lisible par un agent via MCP » est déjà occupé fin 2026 ; Yidik ne peut pas s'y positionner seul.
 
-## 5. Périmètre — phasage
-*   **Phase 0 — Dérisquage** (spikes, aucun engagement de périmètre) : A) stockage navigateur OPFS vs IndexedDB en worker ; B) sémantique de fusion par élément sur scenegraph CRDT ; C) renderer 60 fps à 5–10 k nœuds.
-*   **Phase 1 — MVP démontrable :** canvas vectoriel local, composants formulaires réels + mode Preview, persistance locale, sync LAN mobile ↔ desktop (mono-utilisateur), indicateur de synchronisation.
-*   **Phase 2 — Collaboration :** versioning visuel (commits, branches), fusion 3 panneaux, serveur MCP local, codegen React/Tailwind/TanStack Form.
-*   **Phase 3 — Écosystème :** cibles Vue/Svelte puis Flutter/RN (mapping sémantique requis, cf. doc 05), Yidik Cloud multi-équipes.
-*   **Cut line (ordre de sacrifice) :** cibles codegen secondaires, branches parallèles, filtres/présets, variantes de composants — jamais : instrumentation, sécurité, fiabilité de sync, chemin de rollback.
+## 5. Périmètre - phasage
+*   **Phase 0 - Dérisquage** (spikes, aucun engagement de périmètre) : A) stockage navigateur OPFS vs IndexedDB en worker ; B) sémantique de fusion par élément sur scenegraph CRDT ; C) renderer 60 fps à 5–10 k nœuds.
+*   **Phase 1 - MVP démontrable :** canvas vectoriel local, composants formulaires réels + mode Preview, persistance locale, sync LAN mobile ↔ desktop (mono-utilisateur), indicateur de synchronisation.
+*   **Phase 2 - Collaboration :** versioning visuel (commits, branches), fusion 3 panneaux, serveur MCP local, codegen React/Tailwind/TanStack Form.
+*   **Phase 3 - Écosystème :** cibles Vue/Svelte puis Flutter/RN (mapping sémantique requis, cf. doc 05), Yidik Cloud multi-équipes.
+*   **Cut line (ordre de sacrifice) :** cibles codegen secondaires, branches parallèles, filtres/présets, variantes de composants - jamais : instrumentation, sécurité, fiabilité de sync, chemin de rollback.
 
 ## 6. Métriques (à instrumenter avant toute lecture)
 *   **North star (proposition) :** part des projets actifs hebdomadaires où une maquette Yidik devient du code réutilisé ou est validée en Preview fonctionnel.

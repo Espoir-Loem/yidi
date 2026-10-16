@@ -1,4 +1,4 @@
-# DOCUMENT DE CADRAGE 07 : GUIDE D'ENTRETIENS UTILISATEURS — PHASE 0
+# DOCUMENT DE CADRAGE 07 : GUIDE D'ENTRETIENS UTILISATEURS - PHASE 0
 **Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.0.0
 
 ## 1. Objectif
@@ -7,7 +7,7 @@ Trancher les hypothèses **A1** (douleur hors-ligne) et **A2** (valeur des formu
 | # | Hypothèse | Falsification | Seuil |
 |---|---|---|---|
 | A1 | La douleur « hors-ligne » est épisodique et récente chez la cible | < 4/8 participants décrivent un épisode daté de moins de 30 jours où la connectivité a coûté du temps ou du travail | 4/8 |
-| A2 | Les formulaires fonctionnels en Preview valent un changement d'outil | Aucun participant ne cite spontanément la ré-implémentation des formulaires comme coût significatif, et aucun budget ni propriétaire d'outil n'est évoqué | — |
+| A2 | Les formulaires fonctionnels en Preview valent un changement d'outil | Aucun participant ne cite spontanément la ré-implémentation des formulaires comme coût significatif, et aucun budget ni propriétaire d'outil n'est évoqué | - |
 
 ## 2. Recrutement
 *   **Profil :** product designers et product engineers de petites équipes (< 20 personnes) concevant des interfaces applicatives riches en formulaires, ayant maîtrisé au moins un écran dans les 30 derniers jours.
@@ -30,7 +30,7 @@ Trancher les hypothèses **A1** (douleur hors-ligne) et **A2** (valeur des formu
 *   Chaîne obligatoire : **citation → observation → constat → implication**. Un constat sans citation verbatim n'en est pas un.
 *   Chaque constat porte le **compteur de participants** (« 5/8 ») et, s'il existe, le cas contradictoire.
 *   Séparer explicitement observation et interprétation.
-*   **Sortie :** mise à jour du PRD §1 (preuves) et §7 (résultats A1/A2) — ou déclenchement du critère d'arrêt si l'hypothèse est falsifiée.
+*   **Sortie :** mise à jour du PRD §1 (preuves) et §7 (résultats A1/A2) - ou déclenchement du critère d'arrêt si l'hypothèse est falsifiée.
 
 ## 5. Éthique et données
 *   Consentement explicite pour l'enregistrement ; suppression des enregistrements à 90 jours.
