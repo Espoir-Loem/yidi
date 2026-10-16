@@ -48,7 +48,7 @@ Prérequis : **Node ≥ 24** (`engineStrict` refuse l'installation en dessous) e
 | `pnpm test` | tests Vitest (scénarios de fusion du Spike B dans `packages/{scene,sync}`) |
 | `pnpm build` | build de production de `apps/web` |
 
-Structure : `apps/web` (coquille SPA) et `packages/{ast,scene,sync,layout,tokens}` (contrats, doc 10 §5). **Aucune fonctionnalité produit** : la phase 0 (dérisquage) reste ouverte.
+Structure : `apps/web` (coquille SPA), `apps/server` (coquille backend, structure seule) et `packages/{ast,scene,sync,layout,tokens}` (contrats, doc 10 §5). **Aucune fonctionnalité produit** : la phase 0 (dérisquage) reste ouverte.
 
 ## Licence
 

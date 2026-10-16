@@ -182,6 +182,15 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5))
 
+  apps/server:
+    dependencies:
+      '@yidik/ast':
+        specifier: workspace:*
+        version: link:../../packages/ast
+      '@yidik/scene':
+        specifier: workspace:*
+        version: link:../../packages/scene
+
   apps/web:
     dependencies:
       '@tanstack/react-router':
