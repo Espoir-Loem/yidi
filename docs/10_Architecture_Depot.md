@@ -1,10 +1,11 @@
 # DOCUMENT DE CADRAGE 10 : ARCHITECTURE DU DÉPÔT (MONOREPO PNPM)
-**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.0.0
-*Note de révision 1.0.0 (16/10/2026) : création. Fige les décisions structurantes issues du Spike B (D1-D7), l'arborescence du monorepo, les frontières de dépendances, les contrats de paquets et le pipeline CI. Aucun code produit : la phase 0 reste ouverte (PRD §7).*
+**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.1.0
+*Révision 1.1.0 (16/10/2026) : amendements après l'exécution du squelette - écriture minimale d'`upsertNode` (pas de conflits fantômes), contrat « une seule origine » par projet (`createEmptyReplica`, fusion d'origines indépendantes = conflit de la carte racine), types en alias (contrainte Automerge), installation explicite de pnpm 12.11.2 (bascule automatique impossible depuis pnpm < 12).*
+*Révision 1.0.0 (16/10/2026) : création. Fige les décisions structurantes issues du Spike B (D1-D7), l'arborescence du monorepo, les frontières de dépendances, les contrats de paquets et le pipeline CI. Aucun code produit : la phase 0 reste ouverte (PRD §7).*
 
 ## 1. Statut et périmètre
 *   **Objet :** définir l'architecture du dépôt - arborescence, paquets, frontières, contrats, outillage, CI - pour que le premier code de la phase 1 s'écrive sans redécision structurelle.
-*   **Garde-fou (PRD §7) :** la phase 1 ne démarre pas tant que **A1** (5-8 entretiens, 0/8 à ce jour) et **A3** (Spike A, stockage navigateur) ne sont pas testées. **A4 est vérifiée** depuis le 16/10/2026 (Spike B : fusion par élément réalisable, moteur Automerge - annexe). Le squelette décrit ici ne contient **aucune fonctionnalité produit** et peut exister pendant la phase 0.
+*   **Garde-fou (PRD §7) :** la phase 1 ne démarre pas tant que **A1** (5-8 entretiens, 0/8 à ce jour) et **A3** (Spike A, stockage navigateur) ne sont pas testées. **A4 est vérifiée** depuis le 16/10/2026 (Spike B : fusion par élément réalisable, moteur Automerge - annexe). Le squelette décrit ici est **posé et vérifié en local** (commit `d636efb`, 16/10/2026 : installation à lockfile figé, lint, frontières, types, tests, build - tous verts) et ne contient **aucune fonctionnalité produit** : il peut exister pendant la phase 0.
 *   **Étiquetage des affirmations :** *vérifié* (source primaire), *exécuté* (mesuré - Spike B), *décision* (arbitrage d'architecture). Les versions d'outils de §8 sont vérifiées le 16/10/2026 sur les registres publics (npm, GitHub).
 *   **Rapport aux autres documents :** ce document met en œuvre les docs 01-08 ; en cas de contradiction, les documents de cadrage prévalent jusqu'à amendement.
 
@@ -65,6 +66,7 @@ yidi/
 ### `@yidik/ast` - types seuls, zéro dépendance
 *   `SceneNode` : `{ id, type, parentId, order, deleted?, layout?, style?, props?, state? }` ; `NodeType` : union littérale (`frame`, `text`, `image`, `form_input`, `form_select`, `form_button`, `container`).
 *   `SCHEMA_VERSION` : numéro de schéma du document (migrations, doc 02 §1). Le typage fin par variante (union discriminée des `props`) est un chantier phase 1 - le modèle reste celui du FRD (brouillon v0).
+*   Types déclarés en **alias de type** (jamais `interface`) : seule cette syntaxe fournit la signature d'index implicite exigée par les contraintes `Record<string, unknown>` d'Automerge (vérifié au typecheck, commit `d636efb`).
 
 ### `@yidik/scene` - règles d'arbre pures
 *   `childrenOf(nodes, parentId)` : enfants visibles, triés par `compareSiblings`.
@@ -73,8 +75,9 @@ yidi/
 *   Aucun import d'Automerge : les règles d'arbre restent testables sans le moteur.
 
 ### `@yidik/sync` - document Automerge
-*   `createSceneDocument()` → `Doc<{ schemaVersion, nodes: Record<id, SceneNode> }>`.
-*   `upsertNode(doc, node)` / `removeNode(doc, id)` - `removeNode` pose une **tombstone** (`deleted = true`), ne supprime **jamais** la clé (D4).
+*   `createSceneDocument()` → `Doc<{ schemaVersion, nodes: Record<id, SceneNode> }>` : crée l'**origine unique** d'un projet (§6).
+*   `createEmptyReplica()` : pair vierge (`Automerge.init`), en attente de la base partagée par synchronisation - jamais fusionné avec une origine indépendante (§6).
+*   `upsertNode(doc, node)` / `removeNode(doc, id)` - `removeNode` pose une **tombstone** (`deleted = true`), ne supprime **jamais** la clé (D4). `upsertNode` est une **écriture minimale** : seuls les champs dont la valeur change sont réécrits (comparaison `sameValue`) - réécrire un champ identique ferait apparaître un **conflit fantôme** dans l'UI de merge (exécuté : test dédié).
 *   `mergeScenes(local, remote)` → `Automerge.merge` ; **cloner avant toute bifurcation** (discipline API 3.5, doc 04 §1).
 *   `conflictsFor(doc, id, property)` → `getConflicts(doc.nodes[id], property)` - l'entrée de l'UI de merge (doc 06 §3).
 *   `saveScene(doc)` / `loadScene(bytes)` : binaire (persistance).
@@ -90,6 +93,7 @@ yidi/
 
 ## 6. Données et synchronisation (cible phase 1)
 *   **Document :** racine `{ schemaVersion, nodes }` ; un nœud par entrée `nodes[id]` ; enfants déduits par `parentId` + tri `(order, id)` - pas de tableaux d'enfants à maintenir (le reparentage concurrent est hors MVP, doc 04 §3).
+*   **Une seule origine par projet :** `createSceneDocument()` crée l'origine unique ; tout réplica en dérive par `clone()`, `save()`/`load()` ou synchronisation - un pair neuf part de `createEmptyReplica()`. Fusionner deux origines indépendantes n'est **pas un scénario supporté** : les cartes racine `nodes` entrent en conflit, l'une gagne arbitrairement (exécuté : test dédié) ; la convergence exige une base partagée.
 *   **Flux local :** mutations → document en mémoire → `save()` → moteur de stockage retenu par le **Spike A** (OPFS / IndexedDB / wa-sqlite), dans un **worker dédié par origine** (doc 03 §1).
 *   **Flux réseau :** messages de synchronisation Automerge par WebSocket direct (LAN) - le transport et l'appairage seront spécifiés en phase 1.
 *   **Ce que le squelette ne fait pas :** worker de stockage, empaquetage WASM, transport, UI - hors périmètre de ce document.
@@ -102,7 +106,7 @@ yidi/
 ## 8. Outillage et versions (vérifiées le 16/10/2026)
 | Outil | Version retenue | Note |
 |---|---|---|
-| pnpm | 12.11.2 | `packageManager` exact ; configuration dans `pnpm-workspace.yaml` (pnpm 12 : `.npmrc` = auth/registre seulement ; `allowBuilds` remplace `onlyBuiltDependencies`) |
+| pnpm | 12.11.2 | `packageManager` exact ; configuration dans `pnpm-workspace.yaml` (pnpm 12 : `.npmrc` = auth/registre seulement ; `allowBuilds` remplace `onlyBuiltDependencies`). Depuis pnpm < 12, la bascule automatique échoue, `self-update` inclus (paquets plateforme renommés `@pnpm/exe.*`, archives `.zip`) : installer 12.11.2 explicitement (constaté le 16/10/2026) |
 | Node.js | `engines: >=24` | CI sur Node 26 (`setup-node@v7`) |
 | TypeScript | 7.0.2 | compilateur natif : `baseUrl` non supporté et options historiques allégées - validé empiriquement par le typecheck CI |
 | Biome | 2.5.15 | lint + format uniques (pas d'ESLint ni Prettier) |
