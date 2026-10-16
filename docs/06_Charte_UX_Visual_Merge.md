@@ -2,10 +2,11 @@
 
 **Projet :** Yidik
 **Statut :** Spécification révisée (v1.1) - validation utilisateur à planifier (aucune validation formelle n'a été menée pour la v1.0)
-**Version :** 1.1.0 (Octobre 2026)
+**Version :** 1.1.1 (Octobre 2026)
 **Rôle Rédacteur :** Product Designer / UX-UI Lead
 **Cible :** Équipe Frontend (TanStack / Tauri) & Ingénieurs QA
 
+*Révision 1.1.1 (16/10/2026) : acte les constats du Spike B (annexe) - détection des conflits via `getConflicts` (moteur Automerge, doc 04 §1) ; « suppression vs édition » et collision de rang sont des règles silencieuses, sans alerte ; plus de référence à RxDB.*
 *Révision 1.1.0 (16/10/2026) : libellés orientés utilisateur (suppression du jargon interne), accessibilité (clavier, annonces lecteurs d'écran, reduced-motion), états manquants de la fusion, isolation des saisies du mode Preview, portée d'annulation explicite.*
 
 ---
@@ -15,7 +16,7 @@
 Dans Yidik, l'utilisateur ne doit jamais ressentir de stress lié à sa connectivité. L'interface doit refléter la transparence absolue de l'état de la donnée (sauvegardée en local ou synchronisée).
 
 ### 1.1 L'Indicateur de Statut de Synchronisation (Top Bar UI)
-Situé au centre de la barre supérieure, un badge d'état persistant indique la situation de la base locale RxDB :
+Situé au centre de la barre supérieure, un badge d'état persistant indique la situation du document local (scenegraph Automerge) et de sa synchronisation :
 *   **🟢 État : Synchronisé**
     *   *Visuel :* Icône de nuage vert avec coche (icône de l'ensemble d'icônes produit, pas un emoji).
     *   *Texte (au survol et au focus) :* « Tout est enregistré et synchronisé. »
@@ -48,7 +49,7 @@ Cet onglet remplace l'historique linéaire par un arbre de révisions dynamique 
 
 ## 3. Cinématique de l'Interface de Fusion Visuelle (Visual Merge UI)
 
-Lorsque l'utilisateur repasse en ligne et que le moteur CRDT conserve des écritures concurrentes (registre multi-valeurs, doc 04), le système n'écrase rien. Il fige la zone concernée et alerte l'utilisateur.
+Lorsque l'utilisateur repasse en ligne et que le moteur CRDT (Automerge, doc 04 §1) conserve des écritures concurrentes - registre multi-valeurs exposé par `getConflicts` - le système n'écrase rien. Il fige la zone concernée et alerte l'utilisateur.
 
 ### 3.1 Déclenchement de l'Alerte sur le Canvas
 *   La Frame ou le composant en conflit est entouré d'un liseré rouge/ambre pointillé (pulsation CSS **avec alternative `prefers-reduced-motion` : halo statique**).
@@ -59,7 +60,7 @@ Lorsque l'utilisateur repasse en ligne et que le moteur CRDT conserve des écrit
 Trois espaces de travail verticaux synchronisés en zoom/panoramique (zoomer sur le panneau A zoome B et C au même endroit de manière synchrone) :
 
 *   **Panneau Gauche (A) - « Vos modifications » :** la Frame telle que modifiée localement hors-ligne.
-*   **Panneau Central (B) - « Modifications Distantes » :** la version présente sur le serveur cloud.
+*   **Panneau Central (B) - « Modifications Distantes » :** la version reçue des autres appareils (pair en direct en phase 1) ou du serveur cloud (phase 3).
 *   **Panneau Droit (C) - « Résultat Final » :** zone de rendu dynamique, vide au départ, remplie au fil des choix.
 
 #### Flux utilisateur de fusion étape par étape :
@@ -67,13 +68,14 @@ Trois espaces de travail verticaux synchronisés en zoom/panoramique (zoomer sur
 2.  **Sélection Élément par Élément :** cliquer directement sur un composant en conflit (ex: le bouton).
     *   S'il clique sur le bouton vert du panneau A, le bouton passe au vert dans le panneau C.
     *   S'il clique sur l'Input Email du panneau B (absent de sa version locale), l'élément est immédiatement injecté dans le panneau C.
-3.  **Validation Finale :** une fois tous les conflits arbitrés, le bouton `[ Appliquer la Fusion ]` devient actif. Un clic exécute un `bulkUpsert` définitif dans RxDB, génère un commit de fusion automatique et pousse le résultat vers le backend.
+3.  **Validation Finale :** une fois tous les conflits arbitrés, le bouton `[ Appliquer la Fusion ]` devient actif. Un clic écrit les opérations de résolution dans le document Automerge, génère un commit de fusion automatique et synchronise le résultat (pairs en direct en phase 1, backend au-delà du LAN).
 
 #### 3.3 Modèle d'Interaction et États (ajout v1.1)
 *   **États couverts :** aucun conflit (état vide explicite, pas d'illustration d'erreur), conflits partiellement résolus, **nouveau conflit détecté pendant la fusion** (mise en file et recalcul sans perdre les choix déjà faits), tout résolu → `[ Appliquer la Fusion ]` actif.
 *   **Clavier :** navigation inter-panneaux (Tab), sélection d'élément (flèches), choix (Entrée) ; l'ordre de focus suit les conflits restants.
 *   **Annonces :** chaque nouveau conflit et chaque résolution sont annoncés via `aria-live`.
 *   **Après application :** toast « Fusion appliquée - annulable depuis l'historique ». Le commit de fusion est réversible (doc 04 §4).
+*   **Exceptions silencieuses (constats Spike B) :** deux cas convergent **sans alerte de conflit** et sont assumés tels quels : 1) suppression vs modification - la suppression l'emporte, l'élément reste récupérable via l'historique (doc 04 §2) ; 2) collision de rang d'ordre - départage déterministe `(order, id)`, sans signalement (doc 04 §2).
 *   **Aucun écrasement silencieux :** les valeurs concurrentes non résolues restent visibles.
 
 ---
@@ -90,4 +92,4 @@ Situé dans le coin supérieur droit, un commutateur (Toggle) à deux positions 
 ### 4.2 Isolation des Données de Test (ajout v1.1)
 *   Les saisies et actions du mode Preview s'exécutent dans un **bac à sable jetable** : jamais écrites dans les données du projet.
 *   À la sortie du mode Preview : « Réinitialiser le bac à sable » (par défaut) ou « Capturer comme exemple » (phase 2).
-*   Les appels « simulés » à RxDB en Preview écrivent dans des collections de démonstration éphémères.
+*   Les actions simulées du mode Preview s'exécutent dans un **document Automerge de démonstration jetable** - jamais dans le document du projet.

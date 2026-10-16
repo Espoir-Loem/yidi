@@ -1,5 +1,6 @@
 # DOCUMENT DE CADRAGE 02 : FUNCTIONAL REQUIREMENTS DOCUMENT (FRD)
-**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.1.0
+**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.2.0
+*Révision 1.2.0 (16/10/2026) : alignement sur le Spike B - le schéma du Visual AST est versionné au niveau du document Automerge (types du paquet `@yidik/ast`, doc 10) ; plus de référence aux collections RxDB.*
 *Révision 1.1.0 (16/10/2026) : correction de l'attribution « Auto Layout TanStack » (TanStack n'expose aucun moteur de mise en page), ajout du brouillon de modèle de données Visual AST, clarification de l'isolation des saisies en Preview.*
 
 ## 1. Visual AST - modèle de données minimal (brouillon v0, à valider par spike)
@@ -22,7 +23,7 @@ Règles :
 *   `id` immuable (voir protocole CRDT, doc 04) ; `order` = index fractionnaire, jamais de renumérotation en masse.
 *   `style` référence des **jetons uniquement** - aucune valeur hexadécimale brute dans le document.
 *   Le **moteur d'Auto Layout est interne au projet** (équivalent Flexbox/Grid inspiré de Yoga). *Correction : la v1.0 attribuait l'Auto Layout à « TanStack » - vérification faite, aucune bibliothèque TanStack ne fournit de moteur de mise en page.*
-*   Schéma versionné avec migrations (aligné sur le versioning des collections RxDB).
+*   Schéma versionné avec migrations - la version de schéma est portée par le document Automerge (doc 04 §1) ; les types du modèle vivent dans le paquet `@yidik/ast` (doc 10).
 
 ## 2. Spécification des éléments d'interface réels (Interactive Canvas)
 Yidik sépare chaque élément graphique en deux états exclusifs contrôlés par le moteur de rendu :

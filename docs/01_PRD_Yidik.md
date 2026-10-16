@@ -1,5 +1,6 @@
 # DOCUMENT DE CADRAGE 01 : PRODUCT REQUIREMENT DOCUMENT (PRD)
-**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.1.0
+**Projet :** Yidik (Alternative Figma Local-First) | **Date :** Octobre 2026 | **Version :** 1.2.0
+*Révision 1.2.0 (16/10/2026) : acte le Spike B - A4 vérifiée ; le moteur de fusion du scenegraph est Automerge (`getConflicts`), RxDB écarté (annexe Spike B, docs 03/04/06).*
 *Révision 1.1.0 (16/10/2026) : ajout du problème-cadre, de l'analyse concurrentielle vérifiée, des métriques et critères d'arrêt, du phasage ; les hypothèses non validées sont désormais explicitement étiquetées.*
 
 ## 1. Problème (hypothèses - aucune preuve collectée à ce jour)
@@ -37,7 +38,7 @@ Yidik est un éditeur de design d'interface local-first et distribué, dont la p
 **Fait sourcé :** le champ « maquette lisible par un agent via MCP » est déjà occupé fin 2026 ; Yidik ne peut pas s'y positionner seul.
 
 ## 5. Périmètre - phasage
-*   **Phase 0 - Dérisquage** (spikes, aucun engagement de périmètre) : A) stockage navigateur OPFS vs IndexedDB en worker ; B) sémantique de fusion par élément sur scenegraph CRDT ; C) renderer 60 fps à 5–10 k nœuds.
+*   **Phase 0 - Dérisquage** (spikes, aucun engagement de périmètre) : A) stockage navigateur OPFS vs IndexedDB en worker ; B) sémantique de fusion par élément sur scenegraph CRDT (résolue le 16/10/2026 : moteur Automerge) ; C) renderer 60 fps à 5–10 k nœuds.
 *   **Phase 1 - MVP démontrable :** canvas vectoriel local, composants formulaires réels + mode Preview, persistance locale, sync LAN mobile ↔ desktop (mono-utilisateur), indicateur de synchronisation.
 *   **Phase 2 - Collaboration :** versioning visuel (commits, branches), fusion 3 panneaux, serveur MCP local, codegen React/Tailwind/TanStack Form.
 *   **Phase 3 - Écosystème :** cibles Vue/Svelte puis Flutter/RN (mapping sémantique requis, cf. doc 05), Yidik Cloud multi-équipes.
@@ -54,7 +55,7 @@ Yidik est un éditeur de design d'interface local-first et distribué, dont la p
 | A1 | La douleur « hors-ligne » est épisodique et récente chez la cible | 5–8 entretiens | < 4/8 décrivent un épisode daté < 30 jours | avant code |
 | A2 | Les formulaires fonctionnels en Preview valent un changement d'outil | entretiens + test prix | aucun budget ni propriétaire cité | avant code |
 | A3 | OPFS en worker dédié tient les débits requis (Spike A) | benchmark 3 navigateurs + WebView | débit ou stabilité sous le seuil d'usage | phase 0 |
-| A4 | La fusion par élément (doc 06) est réalisable sur le modèle CRDT (Spike B) | prototype | conflits non préservables / non résolvables | phase 0 |
+| A4 | La fusion par élément (doc 06) est réalisable sur le modèle CRDT (Spike B) | prototype | conflits non préservables / non résolvables | phase 0 - **vérifiée le 16/10/2026 : oui, moteur Automerge** (`getConflicts`, convergence 100/100) ; réserves actées : suppression silencieuse, départage `(order, id)` (docs 04/06, annexe Spike B) |
 | A5 | 60 fps à 5–10 k nœuds (Spike C) | prototype renderer | < 60 fps sur les cibles | phase 0 |
 
 **Critères d'arrêt :** si A1 échoue → repositionner (piste : fidélité formulaire + ownership des données, sans argumentaire offline). Si A4 échoue → réduire la fusion au niveau Frame, ou déléguer le versioning à Git. Aucune phase 1 ne démarre avec A1 et A3 non testées.
