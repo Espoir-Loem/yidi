@@ -1,0 +1,48 @@
+# CI Yidik (doc 10 §9) : lint, frontieres de dependances, types, tests, build.
+# La version de pnpm est lue depuis le champ packageManager de package.json.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Installer (lockfile strict)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint et format (Biome)
+        run: pnpm lint
+
+      - name: Frontieres de dependances
+        run: pnpm check:boundaries
+
+      - name: Types
+        run: pnpm typecheck
+
+      - name: Tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

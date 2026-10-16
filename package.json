@@ -1,0 +1,25 @@
+{
+  "name": "yidi",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @yidik/web dev",
+    "build": "pnpm --filter @yidik/web build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@types/node": "26.6.5",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.5"
+  }
+}

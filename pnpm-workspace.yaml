@@ -1,0 +1,16 @@
+# Composition du workspace et configuration pnpm (pnpm 12 : tout vit ici, pas dans .npmrc).
+# Architecture : doc 10 (docs/10_Architecture_Depot.md).
+packages:
+  - apps/*
+  - packages/*
+
+# Les moteurs déclarés (engines.node) sont stricts : pas d'installation sur Node < 24.
+engineStrict: true
+
+# Versions exactes à l'ajout (D7, doc 10 §7) : pas de plage ^ ou ~.
+minimumReleaseAgeExclude:
+  - '@vitest/mocker@5.0.5'
+  - '@vitest/spy@5.0.5'
+  - vitest@5.0.5
+
+saveExact: true

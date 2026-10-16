@@ -34,6 +34,22 @@
 3. **La fusion par élément est-elle réalisable ?** → spike B exécuté (16/10/2026) : convergence déterministe 100/100 ; décision actée, moteur Automerge (`getConflicts`) - [résultats archivés](docs/annexes/2026-10-16_SpikeB_Resultats.md)
 4. **Le 60 fps tient-il ?** → spike C : 5-10 k nœuds, budget 16,7 ms/frame
 
+## Développement
+
+Prérequis : **Node ≥ 24** (`engineStrict` refuse l'installation en dessous) et **pnpm 12.11.2** (champ `packageManager`).
+
+| Commande | Effet |
+|---|---|
+| `pnpm install` | installe le workspace (lockfile strict ; scripts de build tiers soumis à revue) |
+| `pnpm dev` | serveur de développement de `apps/web` |
+| `pnpm lint` | lint + format vérifiés (Biome) |
+| `pnpm check:boundaries` | applique les frontières de dépendances entre paquets (doc 10 §4) |
+| `pnpm typecheck` | `tsc --noEmit` sur tous les projets |
+| `pnpm test` | tests Vitest (scénarios de fusion du Spike B dans `packages/{scene,sync}`) |
+| `pnpm build` | build de production de `apps/web` |
+
+Structure : `apps/web` (coquille SPA) et `packages/{ast,scene,sync,layout,tokens}` (contrats, doc 10 §5). **Aucune fonctionnalité produit** : la phase 0 (dérisquage) reste ouverte.
+
 ## Licence
 
 MIT - voir [LICENSE](LICENSE).
