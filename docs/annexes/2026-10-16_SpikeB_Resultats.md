@@ -1,6 +1,8 @@
 # Spike B - Résultats : la sémantique de fusion du doc 04 (HLC + registres + MVR) se réalise-t-elle ?
 
-**Date d'exécution :** 16 octobre 2026 · **Statut :** harnais exécuté (Node) - décision d'amendement à acter
+> **Archive (16/10/2026).** Note produite dans `spikes/spike-b-fusion/` ; le dossier `spikes/` (harnais, code jetable) a été retiré du dépôt après extraction des constats - les fichiers bruts cités ci-dessous (`sortie-brute-*.txt`, `rxdb-crdt.js`, `automerge.js`) restent récupérables dans l'historique git (commit `ce35177`). **Décision actée le 16/10/2026 : option A, moteur Automerge.** Amendements correspondants : docs 02/03/04/06/08.
+
+**Date d'exécution :** 16 octobre 2026 · **Statut :** exécuté sous Node - décision d'architecture actée (option A)
 **Question (rappel, doc 08) :** le modèle HLC + registres par attribut + MVR du doc 04 §2 se réalise-t-il avec le plugin CRDT de RxDB, et produit-il exactement les conflits que l'UI de fusion (doc 06 §3) doit arbitrer ?
 
 **Verdict court.** La fusion est déterministe et converge dans les deux candidats (100/100 permutations d'ordre d'arrivée, scénarios a-d). Mais **le plugin CRDT de RxDB n'expose aucun conflit** : il fusionne automatiquement et l'UI de merge ne dispose d'aucune API pour savoir qu'un arbitrage est nécessaire. **Automerge expose exactement le registre multi-valeurs attendu** (`getConflicts`). La phrase de la documentation RxDB est confirmée par l'expérience - implication directe sur la pile du doc 03 et sur le doc 06.

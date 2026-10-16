@@ -22,15 +22,15 @@
 
 | Harnais | État |
 |---|---|
-| [Spike A - stockage navigateur](spikes/spike-a-stockage/) | harnais prêt ; à exécuter sur Chrome, Firefox, Safari et WebView2 (une entrée de mesures par plateforme) |
-| [Spike B - fusion CRDT](spikes/spike-b-fusion/) | exécuté le 16/10/2026 sous Node ; résultats et options dans [RESULTATS.md](spikes/spike-b-fusion/RESULTATS.md) |
+| Spike A - stockage navigateur | harnais retiré du dépôt (récupérable dans l'historique git, commit `8dd5d91`) ; à reconstruire et exécuter sur Chrome, Firefox, Safari et WebView2 (une entrée de mesures par plateforme) |
+| Spike B - fusion CRDT | exécuté le 16/10/2026 sous Node ; décision actée (moteur Automerge) ; résultats archivés dans [docs/annexes/2026-10-16_SpikeB_Resultats.md](docs/annexes/2026-10-16_SpikeB_Resultats.md) |
 | Spike C - renderer 60 fps | à construire si A/B concluants |
 
 ## Questions à trancher avant d'écrire du code produit (Phase 0)
 
 1. **La douleur existe-t-elle ?** → guide 07, hypothèses A1/A2 du PRD §7
 2. **Quel stockage navigateur ?** → spike A : OPFS exige un worker dédié, pas un SharedWorker (constat doc 03 §0)
-3. **La fusion par élément est-elle réalisable ?** → spike B exécuté (16/10/2026) : convergence déterministe validée, mais conflits non exposés par le plugin RxDB - options dans [RESULTATS.md](spikes/spike-b-fusion/RESULTATS.md)
+3. **La fusion par élément est-elle réalisable ?** → spike B exécuté (16/10/2026) : convergence déterministe 100/100 ; décision actée, moteur Automerge (`getConflicts`) - [résultats archivés](docs/annexes/2026-10-16_SpikeB_Resultats.md)
 4. **Le 60 fps tient-il ?** → spike C : 5-10 k nœuds, budget 16,7 ms/frame
 
 ## Licence
